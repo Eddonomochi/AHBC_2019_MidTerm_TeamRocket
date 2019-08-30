@@ -8,133 +8,86 @@ namespace AHBC_MIDTERM_2019_JULY_TEAMROCKET
     public class CategorySelectionApp
     {
 
-        StoreInventory loaclInventory = new StoreInventory();
         private int userMenuSelection { get; set; }
         public int itemSelection { get; set; }
         public int qtySelection { get; set; }
+        public List<string> categories { get; set; }
 
 
         string testSelection;
         string testQTY;
-
         bool isValid;
 
-        List<StoreItem> currentInventory = new List<StoreItem>();
+
         List<StoreItem> tempList = new List<StoreItem>();
-
-
-        public enum localCategory
-        {
-            Clothes = 1,
-            Acccessories = 2,
-            Shoes = 3,
-            Outerwaer = 4
-        }
+        StoreItem tempItem = new StoreItem();
 
 
 
-        public CategorySelectionApp(int userSelection)
+
+
+        public CategorySelectionApp(int userSelection, List<string> originalCategories)
         {
             userMenuSelection = userSelection;
+            categories = originalCategories;
+
         }
 
-        public void categorySelector()
-
+        public void categorySelector(StoreInventory currentInventory, ShoppingCart userCart)
         {
-            localCategory localCategory;
+            currentInventory.GenerateStoreInventory(userCart);
 
-            currentInventory = loaclInventory.GenerateStoreInventory();
 
+            Console.Clear();
             Console.WriteLine("Which item would you like to purchase? (Select from the folowing numbers)");
-            if (userMenuSelection == 1)
+
+            int i = 1;
+            foreach (var item in currentInventory.TotalStoreInventory)
             {
-                int i = 0;
-                foreach (var Categorey in currentInventory)
+
+                if (item.ItemCategory == categories[userMenuSelection - 1])
                 {
-
-                    if (Categorey.ItemCategory == "Clothes")
-                    {
-
-                        Console.WriteLine($"{i} {Categorey.NameOfItem}\tQTY: {Categorey.ItemQuantity}\tPrice: ${Categorey.ItemPrice}");
-                        tempList.Add(Categorey);
-
-                        i++;
-
-                    }
+                    Console.WriteLine("{0,-20} {1,-10:N1} {2,10}", $"{i} {item.NameOfItem}",$"QTY: {item.ItemQuantity}",$"Price: ${NumberToDollarFormat.Execute(item.ItemPrice)}");
+                    tempList.Add(item);
+                    i++;
                 }
-                DislayListOfItems();
             }
-            else if (userMenuSelection == 2)
-            {
-                int i = 0;
-                foreach (var Categorey in currentInventory)
-                {
+            
+            DislayListOfItems(userCart);
 
-                    if (Categorey.ItemCategory == "Accessories")
-                    {
-
-                        Console.WriteLine($"{i} {Categorey.NameOfItem}\tQTY: {Categorey.ItemQuantity}\tPrice: ${Categorey.ItemPrice}");
-                        tempList.Add(Categorey);
-
-                        i++;
-
-                    }
-                }
-                DislayListOfItems();
-            }
-            else if (userMenuSelection == 3)
-            {
-                int i = 0;
-                foreach (var Categorey in currentInventory)
-                {
-
-                    if (Categorey.ItemCategory == "Shoes")
-                    {
-
-                        Console.WriteLine($"{i} {Categorey.NameOfItem}\tQTY: {Categorey.ItemQuantity}\tPrice: ${Categorey.ItemPrice}");
-                        tempList.Add(Categorey);
-
-                        i++;
-
-                    }
-                }
-
-                DislayListOfItems();
-            }
-            else if (userMenuSelection == 4)
-            {
-                int i = 0;
-                foreach (var Categorey in currentInventory)
-                {
-
-                    if (Categorey.ItemCategory == "Outerwear")
-                    {
-
-                        Console.WriteLine($"{i} {Categorey.NameOfItem}\tQTY: {Categorey.ItemQuantity}\tPrice: ${Categorey.ItemPrice}");
-                        tempList.Add(Categorey);
-
-                        i++;
-
-                    }
-                }
-
-                DislayListOfItems();
-            }
         }
-
-        public void DislayListOfItems()
+        public void DislayListOfItems(ShoppingCart tempcart)
         {
             testSelection = Console.ReadLine();
 
+            
+
             ValidItemChoice();
 
-            Console.Write($"How many {tempList[itemSelection].NameOfItem} would you like to purchase (QTY: {tempList[itemSelection].ItemQuantity}):");
+            Console.Write($"How many {tempList[itemSelection-1].NameOfItem}s would you like to purchase (QTY: {tempList[itemSelection-1].ItemQuantity}):");
 
             testQTY = Console.ReadLine();
 
             ValidQuantityEntered();
 
-            Console.WriteLine($"Great! {qtySelection} {tempList[itemSelection].NameOfItem}s have been added to you shopping cart!");
+
+            Console.Clear();
+            Console.WriteLine($"Great! {qtySelection} {tempList[itemSelection-1].NameOfItem}{(qtySelection==1 ? "" : "s")} have been added to you shopping cart!\r");
+            Console.WriteLine();
+
+            if (qtySelection > 0 )
+            {
+                tempItem.NameOfItem = tempList[itemSelection-1].NameOfItem;
+                tempItem.ItemPrice = tempList[itemSelection-1].ItemPrice;
+                tempItem.ItemQuantity = qtySelection;
+                tempItem.ItemCategory = tempList[itemSelection-1].ItemCategory;
+                tempcart.addToCart(tempItem);
+            }
+
+            if (tempcart.Count()>0)
+            {
+                tempcart.DisplayCart();
+            }
         }
 
         public void ValidQuantityEntered()
@@ -144,11 +97,10 @@ namespace AHBC_MIDTERM_2019_JULY_TEAMROCKET
                 if (IntegerValidator.Validate(testQTY))
                 {
 
-                    if (int.Parse(testQTY) > 0 && int.Parse(testQTY) < 26)
+                    if (int.Parse(testQTY) >= 0 && int.Parse(testQTY) <= tempList[itemSelection-1].ItemQuantity)
                     {
                         qtySelection = int.Parse(testQTY);
                         isValid = true;
-
                     }
                     else
                     {
@@ -157,17 +109,12 @@ namespace AHBC_MIDTERM_2019_JULY_TEAMROCKET
                         isValid = false;
 
                     }
-
-
                 }
                 else
                 {
-
                     Console.WriteLine("That is not a valid choice, please try again.");
                     testQTY = Console.ReadLine();
                     isValid = false;
-
-
                 }
             } while (!isValid);
         }
@@ -179,11 +126,10 @@ namespace AHBC_MIDTERM_2019_JULY_TEAMROCKET
                 if (IntegerValidator.Validate(testSelection))
                 {
 
-                    if (int.Parse(testSelection) >= 0 && int.Parse(testSelection) < 6)
+                    if (int.Parse(testSelection) > 0 && int.Parse(testSelection) <= tempList.Count)
                     {
                         itemSelection = int.Parse(testSelection);
                         isValid = true;
-
                     }
                     else
                     {
@@ -192,16 +138,12 @@ namespace AHBC_MIDTERM_2019_JULY_TEAMROCKET
                         isValid = false;
 
                     }
-
-
                 }
                 else
                 {
-
                     Console.WriteLine("That is not a valid choice, please try again.");
                     testSelection = Console.ReadLine();
                     isValid = false;
-
                 }
             } while (!isValid);
         }

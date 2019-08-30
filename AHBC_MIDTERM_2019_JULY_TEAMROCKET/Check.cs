@@ -1,32 +1,60 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AHBC_MIDTERM_2019_JULY_TEAMROCKET
 {
-    class Check : PaymentTypeBase
+
+    public class Check 
     {
         public string AccountNumber { get; set; }
         public string RoutingNumber { get; set; }
 
-        public override void MakeAPayment()
-        {
-        }
 
-
-        public new void PayWithCheck(string total)
+        public void Pay(double total)
         {
-            Console.WriteLine($"Total: {total}\n"); //might not need based on how user interface is set up
+            Console.WriteLine($"Total: ${NumberToDollarFormat.Execute(total)}\n"); //might not need based on how user interface is set up
 
             Console.WriteLine("Check Number:\n");     //validation
-            string checkNum = ValidateCheckNumber(Console.ReadLine());
+            AccountNumber = ValidateCheckNumber(Console.ReadLine());
 
             Console.WriteLine("Routing Number:\n");     //validation
-            string routeNum = ValidateRouteNumber(Console.ReadLine());
+            RoutingNumber = ValidateRouteNumber(Console.ReadLine());
 
             Console.WriteLine("Your transaction has been processed.");
 
+        }
+        public void PrintCheckInfo()
+        {
+            string accountStars = "";
+            string routingStars = "";
+            for (int i = 0; i < AccountNumber.Length-4; i++)
+            {
+                accountStars += "*";
+            }
+            for (int i = 0; i < RoutingNumber.Length - 4; i++)
+            {
+                routingStars += "*";
+            }
+
+            string accountLastFour = "";
+            for (int i = 4; i > 0; i--)
+            {
+                accountLastFour += AccountNumber[AccountNumber.Length - i];
+            }
+
+            string routingLastFour = "";
+            for (int i = 4; i > 0; i--)
+            {
+                routingLastFour += RoutingNumber[RoutingNumber.Length - i];
+            }
+
+
+
+            Console.WriteLine("Thank you for the check payment");
+            Console.WriteLine($"Check Account Number: {accountStars + accountLastFour}");
+            Console.WriteLine($"Check Routing Number: {routingStars + routingLastFour}");
         }
 
         private string ValidateRouteNumber(string routeNum)
@@ -81,5 +109,7 @@ namespace AHBC_MIDTERM_2019_JULY_TEAMROCKET
             }
 
         }
+
     }
+
 }

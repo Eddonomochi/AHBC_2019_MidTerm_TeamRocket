@@ -11,4 +11,6 @@ namespace AHBC_MIDTERM_2019_JULY_TEAMROCKET
         int ItemQuantity { get; set; }
         double ItemPrice { get; set; }
     }
+
+
 }
